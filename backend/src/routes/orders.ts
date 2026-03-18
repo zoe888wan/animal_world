@@ -11,10 +11,11 @@ const router = Router();
 /** 获取当前用户订单及明细 */
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const userId = req.userId!;
     const [rows] = await pool.execute(
       `SELECT o.*, JSON_ARRAYAGG(JSON_OBJECT('product_id', oi.product_id, 'quantity', oi.quantity, 'price', oi.price)) as items
        FROM orders o LEFT JOIN order_items oi ON o.id = oi.order_id WHERE o.user_id = ? GROUP BY o.id ORDER BY o.created_at DESC`,
-      [req.userId]
+      [userId]
     );
     res.json(rows);
   } catch {
@@ -28,13 +29,14 @@ const PERMANENT_OWN_TYPES = ['pet_accessory', 'avatar'] as const;
 /** 下单：虚拟币支付，扣款后立即发放商品 */
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const userId = req.userId!;
     const { items } = req.body;
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: '订单项不能为空' });
     }
     let totalCoins = 0;
     const products: { id: number; price: string; name?: string; popularity_boost: number; type?: string }[] = [];
-    const [uRows] = await pool.execute('SELECT credit_score, COALESCE(coins, 0) as coins FROM users WHERE id = ?', [req.userId]);
+    const [uRows] = await pool.execute('SELECT credit_score, COALESCE(coins, 0) as coins FROM users WHERE id = ?', [userId]);
     const u = (uRows as { credit_score?: number; coins: number }[])[0];
     const credit = u?.credit_score ?? 3;
     const userCoins = u?.coins ?? 0;
@@ -44,7 +46,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
       const p = (r as { id: number; name?: string; price: string; popularity_boost: number; type?: string }[])[0];
       if (!p) return res.status(400).json({ error: `商品 ${it.product_id} 不存在` });
       if (PERMANENT_OWN_TYPES.includes((p.type || '') as typeof PERMANENT_OWN_TYPES[number])) {
-        const [owned] = await pool.execute('SELECT 1 FROM user_products WHERE user_id = ? AND product_id = ? LIMIT 1', [req.userId, p.id]);
+        const [owned] = await pool.execute('SELECT 1 FROM user_products WHERE user_id = ? AND product_id = ? LIMIT 1', [userId, p.id]);
         if ((owned as unknown[]).length > 0) {
           return res.status(400).json({ error: `您已拥有「${p.name || '该款'}」，同款永久拥有、无需重复换取` });
         }
@@ -64,9 +66,9 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: `虚拟币不足，需要 ${totalCoins} 币，当前 ${userCoins} 币` });
     }
 
-    await pool.execute('UPDATE users SET coins = coins - ? WHERE id = ?', [totalCoins, req.userId]);
+    await pool.execute('UPDATE users SET coins = coins - ? WHERE id = ?', [totalCoins, userId]);
 
-    const [ord] = await pool.execute('INSERT INTO orders (user_id, total_amount, status, paid_at) VALUES (?, ?, ?, NOW())', [req.userId!, totalCoins, 'paid']);
+    const [ord] = await pool.execute('INSERT INTO orders (user_id, total_amount, status, paid_at) VALUES (?, ?, ?, NOW())', [userId, totalCoins, 'paid']);
     const orderId = (ord as { insertId: number }).insertId;
 
     for (const it of items) {
@@ -83,20 +85,20 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
       const qty = it.quantity || 1;
       if (prod.type === 'credit_restore') {
         for (let i = 0; i < qty; i++) {
-          await pool.execute('INSERT INTO credit_purchases (user_id, amount, credit_restored) VALUES (?, ?, 1)', [req.userId!, 100]);
-          await pool.execute('UPDATE users SET credit_score = COALESCE(credit_score, 0) + 1 WHERE id = ?', [req.userId]);
+          await pool.execute('INSERT INTO credit_purchases (user_id, amount, credit_restored) VALUES (?, ?, 1)', [userId, 100]);
+          await pool.execute('UPDATE users SET credit_score = COALESCE(credit_score, 0) + 1 WHERE id = ?', [userId]);
         }
       } else {
         const isPermanent = PERMANENT_OWN_TYPES.includes((prod.type || '') as typeof PERMANENT_OWN_TYPES[number]);
         for (let i = 0; i < qty; i++) {
           if (isPermanent && i > 0) break;
-          await pool.execute('INSERT INTO user_products (user_id, product_id, order_id) VALUES (?, ?, ?)', [req.userId!, it.product_id, orderId]);
+          await pool.execute('INSERT INTO user_products (user_id, product_id, order_id) VALUES (?, ?, ?)', [userId, it.product_id, orderId]);
         }
         if (prod.type !== 'boost') totalBoost += (prod.popularity_boost || 0) * (isPermanent ? 1 : qty);
       }
     }
 
-    const [petRows] = await pool.execute('SELECT id FROM pets WHERE owner_id = ? ORDER BY id LIMIT 1', [req.userId]);
+    const [petRows] = await pool.execute('SELECT id FROM pets WHERE owner_id = ? ORDER BY id LIMIT 1', [userId]);
     const petId = (petRows as { id: number }[])[0]?.id;
     if (petId && totalBoost > 0) {
       await pool.execute('UPDATE pets SET popularity = GREATEST(0, popularity + ?) WHERE id = ?', [totalBoost, petId]);
@@ -113,11 +115,12 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 /** 获取订单支付状态 */
 router.get('/:id/status', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const userId = req.userId!;
     const orderId = parseInt(req.params.id, 10);
     if (isNaN(orderId)) return res.status(400).json({ error: '无效订单' });
     const [rows] = await pool.execute(
       'SELECT id, status, paid_at FROM orders WHERE id = ? AND user_id = ?',
-      [orderId, req.userId]
+      [orderId, userId]
     );
     const o = (rows as { id: number; status: string; paid_at: Date | null }[])[0];
     if (!o) return res.status(404).json({ error: '订单不存在' });
@@ -130,11 +133,12 @@ router.get('/:id/status', authMiddleware, async (req: AuthRequest, res) => {
 /** 微信 Native 预支付：生成扫码支付二维码链接 */
 router.post('/:id/wechat-prepay', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const userId = req.userId!;
     const orderId = parseInt(req.params.id, 10);
     if (isNaN(orderId)) return res.status(400).json({ error: '无效订单' });
     const [rows] = await pool.execute(
       'SELECT id, user_id, total_amount, status FROM orders WHERE id = ? AND user_id = ?',
-      [orderId, req.userId]
+      [orderId, userId]
     );
     const order = (rows as { id: number; total_amount: number; status: string }[])[0];
     if (!order) return res.status(404).json({ error: '订单不存在' });
@@ -151,11 +155,12 @@ router.post('/:id/wechat-prepay', authMiddleware, async (req: AuthRequest, res) 
 /** 确认支付成功（微信回调或模拟扫码后调用，发放商品） */
 router.post('/:id/confirm-paid', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const userId = req.userId!;
     const orderId = parseInt(req.params.id, 10);
     if (isNaN(orderId)) return res.status(400).json({ error: '无效订单' });
     const [rows] = await pool.execute(
       'SELECT id, user_id, status FROM orders WHERE id = ? AND user_id = ?',
-      [orderId, req.userId]
+      [orderId, userId]
     );
     const order = (rows as { id: number; user_id: number; status: string }[])[0];
     if (!order) return res.status(404).json({ error: '订单不存在' });

@@ -48,7 +48,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
         const status = pet.health_status ?? 'healthy';
         if (status === 'healthy' && Math.random() < 0.03) {
           await pool.execute('UPDATE pets SET health_status = ? WHERE id = ?', ['sick', pet.id]);
-          (pet as Record<string, string>).health_status = 'sick';
+          pet.health_status = 'sick';
         }
       }
     }

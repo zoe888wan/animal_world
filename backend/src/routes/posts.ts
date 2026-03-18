@@ -51,6 +51,7 @@ router.get('/', async (req, res) => {
 /** 发布动态：可选关联宠物、宠物文本、图片、视频、定位、是否显示时间/定位 */
 router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const userId = req.userId!;
     const { content, images, videos, pet_id, pet_display, location, show_time, show_location } = req.body;
     if (!content?.trim()) return res.status(400).json({ error: '内容不能为空' });
     const imgs = Array.isArray(images) ? JSON.stringify(images) : images ? JSON.stringify([images]) : null;
@@ -58,16 +59,18 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
     const petDisplay = typeof pet_display === 'string' ? pet_display.trim() || null : null;
     await pool.execute(
       'INSERT INTO posts (user_id, pet_id, pet_display, content, images, videos, location, show_time, show_location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [req.userId!, pet_id || null, petDisplay, content.trim(), imgs, vids, location || null, show_time !== false ? 1 : 0, show_location ? 1 : 0]
+      [userId, pet_id || null, petDisplay, content.trim(), imgs, vids, location || null, show_time !== false ? 1 : 0, show_location ? 1 : 0]
     );
-    const [r] = await pool.execute<{ insertId: number }[]>('SELECT LAST_INSERT_ID() as id');
-    const id = (r as unknown as { id: number }[])[0].id;
+    const [r] = await pool.execute('SELECT LAST_INSERT_ID() as id');
+    const id = (r as { id: number }[])[0]?.id;
     const [postRows] = await pool.execute('SELECT * FROM posts WHERE id = ?', [id]);
     const post = (postRows as Record<string, unknown>[])[0];
-    const [userRows] = await pool.execute('SELECT username, nickname, avatar_url FROM users WHERE id = ?', [req.userId!]);
+    const [userRows] = await pool.execute('SELECT username, nickname, avatar_url FROM users WHERE id = ?', [userId]);
     const user = (userRows as Record<string, unknown>[])[0];
-    const pet = post.pet_id
-      ? ((await pool.execute('SELECT name, avatar_url FROM pets WHERE id = ?', [post.pet_id]))[0] as Record<string, unknown>[])[0]
+    const postPetId = (post as { pet_id?: unknown }).pet_id;
+    const petId = postPetId != null ? Number(postPetId) : null;
+    const pet = petId
+      ? ((await pool.execute('SELECT name, avatar_url FROM pets WHERE id = ?', [petId]))[0] as Record<string, unknown>[])[0]
       : null;
     const displayName = petDisplay || pet?.name;
     res.status(201).json({
