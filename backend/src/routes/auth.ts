@@ -26,11 +26,26 @@ router.post('/register', async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const verifyToken = crypto.randomBytes(32).toString('hex');
     const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-    const [r] = await pool.execute(
-      'INSERT INTO users (username, email, password_hash, email_verified, email_verify_token, email_verify_expires) VALUES (?, ?, ?, 0, ?, ?)',
-      [username, emailNorm, hash, verifyToken, verifyExpires]
-    );
-    const insertId = (r as { insertId: number }).insertId;
+    let insertId: number;
+    try {
+      const [r] = await pool.execute(
+        'INSERT INTO users (username, email, password_hash, email_verified, email_verify_token, email_verify_expires) VALUES (?, ?, ?, 0, ?, ?)',
+        [username, emailNorm, hash, verifyToken, verifyExpires]
+      );
+      insertId = (r as { insertId: number }).insertId;
+    } catch (e: unknown) {
+      const err = e as { code?: string; message?: string };
+      // 兼容旧版 schema：users 表可能没有邮箱验证相关字段
+      if (err.code === 'ER_BAD_FIELD_ERROR') {
+        const [r] = await pool.execute(
+          'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+          [username, emailNorm, hash]
+        );
+        insertId = (r as { insertId: number }).insertId;
+      } else {
+        throw e;
+      }
+    }
     const [rows] = await pool.execute('SELECT id, username, email FROM users WHERE id = ?', [insertId]);
     const user = (rows as { id: number; username: string; email: string }[])[0];
     const token = jwt.sign(
@@ -39,12 +54,16 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
     const baseUrl = process.env.FRONTEND_URL || `http://localhost:${process.env.FRONTEND_PORT || '5173'}`;
+    // 兼容旧版 schema：如果没有邮箱验证字段，仍允许注册并跳过邮件
     await sendVerificationEmail(emailNorm, verifyToken, baseUrl);
     res.json({ user: { id: user.id, username: user.username, email: user.email }, token });
   } catch (e: unknown) {
     const err = e as { code?: string; message?: string };
     if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ error: '该邮箱已注册' });
+      const msg = err.message || '';
+      if (msg.includes('email')) return res.status(400).json({ error: '该邮箱已注册' });
+      if (msg.includes('username')) return res.status(400).json({ error: '该用户名已被使用' });
+      return res.status(400).json({ error: '注册信息重复' });
     }
     console.error('Register error:', err);
     const msg = process.env.NODE_ENV === 'development' && err.message ? err.message : '注册失败';
@@ -59,9 +78,10 @@ router.post('/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: '邮箱和密码必填' });
     }
+    const emailNorm = String(email).trim().toLowerCase();
     const [rows] = await pool.execute(
       'SELECT id, username, email, password_hash, avatar_url, nickname FROM users WHERE email = ?',
-      [email]
+      [emailNorm]
     );
     const user = (rows as { id: number; password_hash: string }[])[0];
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
@@ -102,10 +122,19 @@ router.post('/send-code', async (req, res) => {
     }
     const code = crypto.randomInt(100000, 999999).toString();
     const expires = new Date(Date.now() + 5 * 60 * 1000);
-    await pool.execute(
-      'UPDATE users SET login_code = ?, login_code_expires = ? WHERE id = ?',
-      [code, expires, user.id]
-    );
+    try {
+      await pool.execute(
+        'UPDATE users SET login_code = ?, login_code_expires = ? WHERE id = ?',
+        [code, expires, user.id]
+      );
+    } catch (e: unknown) {
+      const err = e as { code?: string };
+      // 兼容旧版 schema：没有验证码字段时直接报错提示升级数据库
+      if (err.code === 'ER_BAD_FIELD_ERROR') {
+        return res.status(500).json({ error: '服务器未启用验证码登录（数据库未升级），请使用密码登录' });
+      }
+      throw e;
+    }
     const ok = await sendLoginCodeEmail(user.email, code);
     if (!ok) {
       return res.status(500).json({ error: '验证码发送失败，请稍后重试' });
@@ -124,9 +153,10 @@ router.post('/login-with-code', async (req, res) => {
     if (!email || !code || typeof email !== 'string' || typeof code !== 'string') {
       return res.status(400).json({ error: '邮箱和验证码必填' });
     }
+    const emailNorm = email.trim().toLowerCase();
     const [rows] = await pool.execute(
       'SELECT id, username, email, avatar_url, nickname, login_code, login_code_expires FROM users WHERE email = ?',
-      [email.trim().toLowerCase()]
+      [emailNorm]
     );
     const user = (rows as { id: number; username: string; email: string; avatar_url?: string; nickname?: string; login_code: string; login_code_expires: Date }[])[0];
     if (!user) {
