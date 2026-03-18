@@ -24,7 +24,8 @@ mysql_cmd() {
 
 echo "[0/5] Quick backup (optional but recommended)"
 echo "Creating ~/animal_world_backup_$(date +%Y%m%d_%H%M%S).sql"
-mysqldump -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" > "${HOME}/animal_world_backup_$(date +%Y%m%d_%H%M%S).sql"
+# MySQL on Ubuntu may restrict PROCESS privilege; avoid tablespaces to keep backup working.
+mysqldump -u "${DB_USER}" -p"${DB_PASS}" --no-tablespaces "${DB_NAME}" > "${HOME}/animal_world_backup_$(date +%Y%m%d_%H%M%S).sql"
 
 echo "[A/5] Add post media fields (if missing)"
 cd "${ROOT_DIR}/backend"
