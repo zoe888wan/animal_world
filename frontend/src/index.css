@@ -1,0 +1,63 @@
+/**
+ * 动物世界 - 设计系统
+ * 风格：护眼、简约可爱、手绘卡通风
+ * 柔和背景，避免刺眼，层次丰富
+ */
+:root {
+  /* 主背景：柔和米灰，护眼不刺眼 */
+  --bg: #ebe8e3;
+  --bg-page: #e8e5e0;
+  /* 卡片：暖灰白，略深于背景增加层次 */
+  --card: #f5f2ed;
+  /* 区块强调色：更浅一层 */
+  --card-hover: #faf8f5;
+  /* 边框：低饱和度、柔和 */
+  --border: #d4cfc7;
+  --border-soft: #e0dcd5;
+  /* 文字：柔和深色，降低对比 */
+  --text: #4a453c;
+  --text-muted: #7a756c;
+  /* 强调色：暖棕 */
+  --accent: #a86d48;
+  --accent-hover: #8d5c3a;
+  --accent-soft: rgba(168, 109, 72, 0.18);
+  /* 辅助色：柔和绿、珊瑚 */
+  --success: #6d8b66;
+  --success-soft: rgba(109, 139, 102, 0.2);
+  --danger: #b86d65;
+  --danger-soft: rgba(184, 109, 101, 0.15);
+  /* 点缀色：丰富层次 */
+  --accent-2: #8a9b7a;
+  --accent-3: #c4a77d;
+  /* 圆角 */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'Noto Sans SC', -apple-system, sans-serif;
+  background: var(--bg-page);
+  background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(196, 167, 125, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(138, 155, 122, 0.06), transparent);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea { font-family: inherit; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-muted);
+}

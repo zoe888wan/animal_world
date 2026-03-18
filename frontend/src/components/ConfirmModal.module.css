@@ -1,0 +1,55 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 56, 44, 0.25);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.title { margin: 0 0 0.75rem; font-size: 1.1rem; color: var(--text); }
+.message { color: var(--text); margin: 0 0 1.25rem; line-height: 1.6; }
+.actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.primary {
+  padding: 0.55rem 1.25rem;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.primary:hover { background: var(--accent-hover); }
+
+.primaryDanger {
+  padding: 0.55rem 1.25rem;
+  background: var(--danger);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary {
+  padding: 0.55rem 1.25rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  cursor: pointer;
+}
+.secondary:hover { border-color: var(--text-muted); background: var(--border-soft); }

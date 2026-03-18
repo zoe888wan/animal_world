@@ -1,0 +1,64 @@
+.mascot {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.mascot:hover { transform: scale(1.1); }
+.mascot:focus { outline: none; }
+
+.mascot.top-left { top: 80px; left: 12px; }
+.mascot.top-right { top: 80px; right: 12px; }
+.mascot.bottom-left { bottom: 20px; left: 12px; }
+.mascot.bottom-right { bottom: 20px; right: 12px; }
+
+.blob {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.face {
+  width: 36px;
+  height: 36px;
+}
+
+.mascot.bounce .blob {
+  animation: mascotBounce 0.6s ease;
+}
+
+@keyframes mascotBounce {
+  0%, 100% { transform: scale(1); }
+  20% { transform: scale(1.25); }
+  40% { transform: scale(0.9); }
+  60% { transform: scale(1.1); }
+  80% { transform: scale(0.95); }
+}
+
+.bubble {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.2rem;
+  animation: bubblePop 0.5s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes bubblePop {
+  0% { opacity: 1; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1) translateY(-12px); }
+}

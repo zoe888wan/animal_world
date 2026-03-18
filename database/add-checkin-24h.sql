@@ -1,0 +1,9 @@
+-- 签到改为每24小时一次
+USE animal_world;
+
+SET @s = (SELECT IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'last_checkin_at') = 0,
+  'ALTER TABLE users ADD COLUMN last_checkin_at DATETIME NULL',
+  'SELECT 1'
+));
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
