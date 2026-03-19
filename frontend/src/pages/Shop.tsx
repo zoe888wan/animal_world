@@ -38,6 +38,7 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
   const [exchanging, setExchanging] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [imgRetryTs, setImgRetryTs] = useState<Record<number, number>>({});
 
   const filteredProducts = useMemo(() => {
     if (!categoryFilter) return products;
@@ -91,6 +92,8 @@ export default function Shop() {
                   const imgUrl = getProductImageUrl(p);
                   const isAvatarEmoji = p.type === 'avatar' && p.avatar_value && !String(p.avatar_value).startsWith('http');
                   const fallbackEmoji = getProductEmoji(p);
+                  const retryTs = imgRetryTs[p.id] || 0;
+                  const finalImgUrl = imgUrl ? `${imgUrl}${imgUrl.includes('?') ? '&' : '?'}cb=${retryTs || 0}` : null;
                   return (
                     <div key={p.id} className={styles.card}>
                       <div className={styles.img} title={p.name}>
@@ -99,7 +102,23 @@ export default function Shop() {
                         ) : (
                           <>
                             <span className={styles.imgEmoji}>{fallbackEmoji}</span>
-                            {imgUrl && <img src={imgUrl} alt={p.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; }} />}
+                            {finalImgUrl && (
+                              <img
+                                src={finalImgUrl}
+                                alt={p.name}
+                                loading="lazy"
+                                decoding="async"
+                                onError={(e) => {
+                                  // 不直接隐藏：先重试一次（强制绕过缓存），避免偶发网络/缓存导致“全是占位图”
+                                  if (!imgRetryTs[p.id]) {
+                                    setImgRetryTs((m) => ({ ...m, [p.id]: Date.now() }));
+                                    return;
+                                  }
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.style.opacity = '0';
+                                }}
+                              />
+                            )}
                           </>
                         )}
                       </div>
