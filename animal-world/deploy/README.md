@@ -53,6 +53,26 @@ export DB_PASS='StrongPasswordHere'
 bash build_and_run_pm2.sh
 ```
 
+### 更新部署（代码推送到 GitHub 后）
+
+在服务器上执行（进入 deploy 目录后运行）：
+
+```bash
+# 克隆路径通常是 ~/animal_world（或 ~/animal-world），deploy 在 animal-world/deploy 下
+cd ~/animal_world/animal-world/deploy
+# 或 cd ~/animal-world/animal-world/deploy
+bash update_from_github.sh
+```
+
+该脚本会：`git pull` → 构建前后端 → 执行商城商品清理（仅保留改名卡/置顶卡/头像）→ 重启 pm2。
+
+**仅执行商城商品清理**（代码已更新，只需更新数据库）：
+
+```bash
+cd ~/animal_world/animal-world/deploy
+bash run_shop_products_cleanup.sh
+```
+
 ### 诊断命令（只读）
 ```bash
 pm2 status

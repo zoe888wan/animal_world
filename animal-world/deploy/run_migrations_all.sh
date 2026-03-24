@@ -58,6 +58,8 @@ if [[ "${HAS_PRODUCTS}" -eq 0 ]]; then
   echo "No products found; seeding base products..."
   mysql_cmd < seed-mysql.sql
 fi
+# 商城仅保留：改名卡、置顶卡、头像
+mysql_cmd < shop-products-only-rename-pin-avatar.sql
 
 echo "[7/7] Restart and health check"
 if command -v pm2 >/dev/null 2>&1; then
