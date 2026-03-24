@@ -1,0 +1,4 @@
+USE animal_world;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified TINYINT(1) DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_token VARCHAR(64) NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_expires DATETIME NULL;

@@ -1,0 +1,152 @@
+.card {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.head { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar span { font-size: 1.5rem; }
+
+.meta { display: flex; flex-direction: column; flex: 1; position: relative; }
+
+.deletePost {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+.deletePost:hover { color: var(--danger); }
+
+.name { font-weight: 600; color: var(--text); }
+.name small { font-weight: 400; color: var(--text-muted); }
+.time { font-size: 0.8rem; color: var(--text-muted); }
+.content { margin-bottom: 1rem; white-space: pre-wrap; color: var(--text); line-height: 1.5; }
+
+.stats { display: flex; gap: 1rem; font-size: 0.9rem; align-items: center; flex-wrap: wrap; color: var(--text-muted); margin-bottom: 0.5rem; }
+.statBtn { background: none; border: none; color: var(--text-muted); font-size: inherit; cursor: pointer; padding: 0; }
+.statBtn:hover { color: var(--accent); }
+.statBtn.liked { color: var(--danger); }
+
+.comments { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-soft); }
+.commentList { list-style: none; padding: 0; margin: 0; }
+.commentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+.commentItem:last-child { border-bottom: none; }
+.commentBody { flex: 1; min-width: 0; }
+.commentActions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.commentLike, .commentDelete { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; padding: 0.2rem 0; }
+.commentLike:hover, .commentDelete:hover { color: var(--accent); }
+.commentLike.liked { color: var(--danger); }
+
+.comments form { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.comments input {
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+.comments button { padding: 0.55rem 0.8rem; background: var(--accent); border: none; border-radius: var(--radius-sm); color: #fff; font-weight: 600; }
+.commentBody strong { margin-right: 0.5rem; }
+
+.commentToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font-size: inherit;
+}
+.triangle { font-size: 0.7em; color: var(--text-muted); }
+
+.loadMore {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.loadMore:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.loadMore:disabled { cursor: not-allowed; opacity: 0.7; }
+
+.deleteModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 56, 44, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deleteModalContent {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  max-width: 320px;
+  text-align: center;
+  border: 1px solid var(--border-soft);
+}
+.deleteModalContent p { margin: 0 0 1rem; color: var(--text); }
+.deleteModalBtns { display: flex; gap: 0.75rem; justify-content: center; }
+.deleteModalBtns button {
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.deleteConfirm { background: var(--danger) !important; border-color: var(--danger) !important; color: #fff !important; }
+
+.media { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.mediaHint { width: 100%; margin: 0 0 0.25rem; font-size: 0.8rem; color: var(--text-muted); }
+.mediaImg { max-width: 200px; max-height: 200px; border-radius: var(--radius-md); object-fit: cover; cursor: pointer; }
+.mediaImg:hover { opacity: 0.9; }
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 56, 44, 0.9);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+.mediaVideo { max-width: 280px; max-height: 200px; border-radius: var(--radius-md); }
+.location { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }

@@ -1,0 +1,77 @@
+.layout { min-height: 100vh; background: var(--bg-page); }
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.8rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  min-height: 40px;
+}
+
+.logo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo:hover { color: var(--accent); text-decoration: none; }
+
+.nav { display: flex; gap: 0.5rem; flex-shrink: 0; flex-wrap: nowrap; }
+.nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+.nav a:hover { color: var(--accent); text-decoration: none; background: var(--accent-soft); }
+.nav a.active { color: var(--accent); font-weight: 600; background: var(--accent-soft); }
+
+.user { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.checkinBtn {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.checkinBtn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.checkinBtn:disabled { opacity: 0.7; cursor: not-allowed; }
+.checkinMsg { font-size: 0.8rem; color: var(--accent); margin-right: 0.25rem; }
+.coins { font-size: 0.9rem; color: var(--accent); font-weight: 600; }
+
+.userAvatar {
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+.userAvatar img { width: 100%; height: 100%; object-fit: cover; }
+.userAvatar > div { display: flex; align-items: center; justify-content: center; }
+
+.userName { color: var(--text-muted); font-size: 0.85rem; text-decoration: none; }
+.userName:hover { color: var(--accent); }
+
+.logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
+.logout:hover { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); text-decoration: none; }
+
+.main { max-width: 640px; margin: 0 auto; padding: 1.5rem; }

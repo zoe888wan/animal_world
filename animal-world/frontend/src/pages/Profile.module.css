@@ -1,0 +1,78 @@
+.page { padding: 1.5rem; max-width: 480px; margin: 0 auto; }
+.page h2 { margin-bottom: 1rem; color: var(--text); }
+
+.form { display: flex; flex-direction: column; gap: 1.25rem; }
+.form label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+.form input, .form textarea {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+.form button[type="submit"] { padding: 0.8rem; background: var(--accent); border: none; border-radius: var(--radius-md); color: #fff; font-weight: 600; }
+.form button[type="submit"]:hover { background: var(--accent-hover); }
+.form button[type="submit"]:disabled { opacity: 0.7; }
+
+.avatarSection { margin-bottom: 0.5rem; }
+.avatarSection label { margin-bottom: 0.25rem; }
+.hint { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.creditHint { font-size: 0.9rem; margin-bottom: 0.5rem; }
+.creditRestore {
+  padding: 1rem;
+  background: var(--accent-soft);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent);
+  margin-bottom: 1rem;
+}
+.creditRestore p { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--text); }
+.creditRestore button { padding: 0.55rem 1rem; background: var(--accent); border: none; border-radius: var(--radius-md); color: #fff; font-weight: 600; cursor: pointer; }
+.quotaHint { font-size: 0.85rem; color: var(--text-muted); margin: -0.5rem 0 1rem; }
+
+.avatarGrid { display: flex; flex-wrap: wrap; gap: 0.5rem; touch-action: manipulation; }
+.avatarBtn {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--card);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.avatarBtn:hover { border-color: var(--accent); }
+.avatarBtn.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+.subLabel { font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0 0.35rem; }
+.avatarImg { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.field { margin-bottom: 0; }
+.avatarFrameRow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.avatarFramePreview { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+.previewLabel { font-size: 0.75rem; color: var(--text-muted); }
+.frameSelect { padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text); min-width: 140px; }
+.muted { color: var(--text-muted); text-align: center; padding: 2rem; }
+
+.companionSelect { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.companionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.companionBtn:hover { border-color: var(--accent); }
+.companionBtn.selected { border-color: var(--accent); background: var(--accent-soft); }
+.companionAvatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.companionEmoji { font-size: 1.4rem; }
+.companionName { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
